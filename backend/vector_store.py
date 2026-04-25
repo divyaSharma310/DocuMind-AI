@@ -14,6 +14,7 @@ def save_to_vector_db(chunks):
     vector_db = Chroma.from_documents(
         documents=chunks, 
         embedding=embeddings, 
+        
         persist_directory="./db_storage"
     )
     return vector_db
