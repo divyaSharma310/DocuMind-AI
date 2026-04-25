@@ -1,0 +1,15 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/db_storage/
+backend/.env
+backend/*.pdf
+backend/temp_*
+
+# React / Node
+frontend/node_modules/
+frontend/dist/
+
+# OS files
+.DS_Store
+Thumbs.db
