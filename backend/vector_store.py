@@ -1,13 +1,18 @@
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_groq import GroqEmbeddings
 from langchain_community.vectorstores import Chroma
 import os
 import shutil
+from dotenv import load_dotenv
 
-# Free embedding model
-embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+load_dotenv()
+
+# Ab hum local RAM use nahi karenge, Groq ki Cloud API use karenge
+embeddings = GroqEmbeddings(
+    model_name="nomic-embed-text-v1.5",
+    groq_api_key=os.getenv("GROQ_API_KEY")
+)
 
 def save_to_vector_db(chunks):
-    # Purana data saaf karna taaki naye file mein confusion na ho
     if os.path.exists("./db_storage"):
         shutil.rmtree("./db_storage")
         
