@@ -1,13 +1,8 @@
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-
 import os
 import shutil
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-# Direct imports since Root Directory is set to 'backend'
 from ingestor import process_pdf
 from vector_store import save_to_vector_db, load_vector_db
 from brain import ask_question
@@ -24,8 +19,8 @@ app.add_middleware(
 vector_db = None
 
 @app.get("/")
-def health():
-    return {"status": "online"}
+def home():
+    return {"status": "DocuMind AI is Live on Koyeb"}
 
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
@@ -51,6 +46,7 @@ async def chat(q: str):
         try:
             vector_db = load_vector_db()
         except:
-            raise HTTPException(status_code=400, detail="Upload PDF first")
+            raise HTTPException(status_code=400, detail="Please upload a PDF")
+    
     answer = ask_question(vector_db, q)
     return {"answer": answer}
