@@ -3,10 +3,15 @@ import shutil
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-# Standard local imports
-from ingestor import process_pdf
-from vector_store import save_to_vector_db, load_vector_db
-from brain import ask_question
+# Using relative imports to fix the "ModuleNotFoundError"
+try:
+    from ingestor import process_pdf
+    from vector_store import save_to_vector_db, load_vector_db
+    from brain import ask_question
+except ImportError:
+    from backend.ingestor import process_pdf
+    from backend.vector_store import save_to_vector_db, load_vector_db
+    from backend.brain import ask_question
 
 app = FastAPI()
 
@@ -21,7 +26,7 @@ vector_db = None
 
 @app.get("/")
 def health_check():
-    return {"status": "healthy", "engine": "DocuMind-AI"}
+    return {"status": "Live", "project": "DocuMind-AI"}
 
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):

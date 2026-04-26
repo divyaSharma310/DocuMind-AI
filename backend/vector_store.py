@@ -1,9 +1,16 @@
-from langchain_huggingface import HuggingFaceEndpointEmbeddings
-from langchain_community.vectorstores import Chroma
 import os
 import shutil
 
-# This uses the Inference API (0MB RAM usage on Render)
+# --- THE FIX FOR RENDER/CHROMA ---
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+# ---------------------------------
+
+from langchain_huggingface import HuggingFaceEndpointEmbeddings
+from langchain_community.vectorstores import Chroma
+
+# Using API-based embeddings to save RAM
 embeddings = HuggingFaceEndpointEmbeddings(
     model="sentence-transformers/all-MiniLM-L6-v2",
     huggingfacehub_api_token=os.getenv("HF_TOKEN")
