@@ -3,14 +3,13 @@ import shutil
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-# These imports are now optimized for Render
+# Standard local imports
 from ingestor import process_pdf
 from vector_store import save_to_vector_db, load_vector_db
 from brain import ask_question
 
 app = FastAPI()
 
-# Enable CORS for Vercel/Localhost
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,8 +20,8 @@ app.add_middleware(
 vector_db = None
 
 @app.get("/")
-def home():
-    return {"message": "DocuMind API is Live"}
+def health_check():
+    return {"status": "healthy", "engine": "DocuMind-AI"}
 
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
@@ -34,7 +33,9 @@ async def upload(file: UploadFile = File(...)):
         chunks = process_pdf(file_path)
         global vector_db
         vector_db = save_to_vector_db(chunks)
-        os.remove(file_path)
+        
+        if os.path.exists(file_path):
+            os.remove(file_path)
         
         return {"status": "Success", "message": f"{file.filename} indexed!"}
     except Exception as e:
@@ -47,11 +48,7 @@ async def chat(q: str):
         try:
             vector_db = load_vector_db()
         except:
-            raise HTTPException(status_code=400, detail="Upload a PDF first")
+            raise HTTPException(status_code=400, detail="Database not initialized")
     
     answer = ask_question(vector_db, q)
     return {"answer": answer}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=10000)

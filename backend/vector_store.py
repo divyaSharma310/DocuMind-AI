@@ -3,7 +3,7 @@ from langchain_community.vectorstores import Chroma
 import os
 import shutil
 
-# API based embeddings - Uses 0MB RAM on your server
+# This uses the Inference API (0MB RAM usage on Render)
 embeddings = HuggingFaceEndpointEmbeddings(
     model="sentence-transformers/all-MiniLM-L6-v2",
     huggingfacehub_api_token=os.getenv("HF_TOKEN")
