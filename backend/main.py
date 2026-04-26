@@ -3,6 +3,7 @@ import shutil
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+# Direct imports work because of ENV PYTHONPATH in Dockerfile
 from ingestor import process_pdf
 from vector_store import save_to_vector_db, load_vector_db
 from brain import ask_question
@@ -20,12 +21,13 @@ vector_db = None
 
 @app.get("/")
 def home():
-    return {"status": "DocuMind AI is Live on Koyeb"}
+    return {"status": "DocuMind AI is Live on Hugging Face"}
 
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
     try:
-        file_path = f"temp_{file.filename}"
+        # Save to current directory in Docker
+        file_path = f"./{file.filename}"
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
@@ -46,7 +48,7 @@ async def chat(q: str):
         try:
             vector_db = load_vector_db()
         except:
-            raise HTTPException(status_code=400, detail="Please upload a PDF")
+            return {"answer": "Please upload a PDF first to start the conversation."}
     
     answer = ask_question(vector_db, q)
     return {"answer": answer}
