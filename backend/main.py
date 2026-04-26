@@ -3,15 +3,10 @@ import shutil
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-# Using relative imports to fix the "ModuleNotFoundError"
-try:
-    from ingestor import process_pdf
-    from vector_store import save_to_vector_db, load_vector_db
-    from brain import ask_question
-except ImportError:
-    from backend.ingestor import process_pdf
-    from backend.vector_store import save_to_vector_db, load_vector_db
-    from backend.brain import ask_question
+# Standard local imports - No folder prefix needed
+from ingestor import process_pdf
+from vector_store import save_to_vector_db, load_vector_db
+from brain import ask_question
 
 app = FastAPI()
 
@@ -25,8 +20,8 @@ app.add_middleware(
 vector_db = None
 
 @app.get("/")
-def health_check():
-    return {"status": "Live", "project": "DocuMind-AI"}
+def health():
+    return {"status": "online"}
 
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
@@ -42,7 +37,7 @@ async def upload(file: UploadFile = File(...)):
         if os.path.exists(file_path):
             os.remove(file_path)
         
-        return {"status": "Success", "message": f"{file.filename} indexed!"}
+        return {"status": "Success"}
     except Exception as e:
         return {"status": "Error", "message": str(e)}
 
@@ -53,7 +48,7 @@ async def chat(q: str):
         try:
             vector_db = load_vector_db()
         except:
-            raise HTTPException(status_code=400, detail="Database not initialized")
+            raise HTTPException(status_code=400, detail="Upload PDF first")
     
     answer = ask_question(vector_db, q)
     return {"answer": answer}
