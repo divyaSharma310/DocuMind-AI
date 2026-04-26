@@ -1,9 +1,13 @@
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 import os
 import shutil
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-# DO NOT use "from backend.ingestor", use exactly this:
+# Direct imports since Root Directory is set to 'backend'
 from ingestor import process_pdf
 from vector_store import save_to_vector_db, load_vector_db
 from brain import ask_question
@@ -36,7 +40,6 @@ async def upload(file: UploadFile = File(...)):
         
         if os.path.exists(file_path):
             os.remove(file_path)
-        
         return {"status": "Success"}
     except Exception as e:
         return {"status": "Error", "message": str(e)}
@@ -48,7 +51,6 @@ async def chat(q: str):
         try:
             vector_db = load_vector_db()
         except:
-            raise HTTPException(status_code=400, detail="Database not initialized")
-    
+            raise HTTPException(status_code=400, detail="Upload PDF first")
     answer = ask_question(vector_db, q)
     return {"answer": answer}
