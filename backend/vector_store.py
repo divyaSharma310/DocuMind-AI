@@ -1,16 +1,17 @@
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_community.vectorstores import Chroma
 import os
 import shutil
 
-# Free embedding model used for production
-embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+# API based embeddings - Uses 0MB RAM on your server
+embeddings = HuggingFaceEndpointEmbeddings(
+    model="sentence-transformers/all-MiniLM-L6-v2",
+    huggingfacehub_api_token=os.getenv("HF_TOKEN")
+)
 
 def save_to_vector_db(chunks):
-    # Clear existing database to save space and prevent conflicts on Render
     if os.path.exists("./db_storage"):
         shutil.rmtree("./db_storage")
-        
     vector_db = Chroma.from_documents(
         documents=chunks, 
         embedding=embeddings, 
