@@ -3,7 +3,7 @@ import shutil
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-# Standard local imports - No folder prefix needed
+# DO NOT use "from backend.ingestor", use exactly this:
 from ingestor import process_pdf
 from vector_store import save_to_vector_db, load_vector_db
 from brain import ask_question
@@ -48,7 +48,7 @@ async def chat(q: str):
         try:
             vector_db = load_vector_db()
         except:
-            raise HTTPException(status_code=400, detail="Upload PDF first")
+            raise HTTPException(status_code=400, detail="Database not initialized")
     
     answer = ask_question(vector_db, q)
     return {"answer": answer}
