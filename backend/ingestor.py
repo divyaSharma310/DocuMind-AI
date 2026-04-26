@@ -5,7 +5,7 @@ def process_pdf(file_path):
     loader = PyPDFLoader(file_path)
     pages = loader.load()
     
-    # Chunk size badha di taaki AI ko ek baar mein zyada context mile 
+    # Using larger chunks for better context on Groq
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000, 
         chunk_overlap=100

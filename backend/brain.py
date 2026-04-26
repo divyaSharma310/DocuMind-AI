@@ -4,28 +4,25 @@ from langchain_core.prompts import PromptTemplate
 import os
 from dotenv import load_dotenv
 
-# Isse .env file load ho jayegi
 load_dotenv()
 
 def ask_question(vector_db, query):
-    # API Key uthana
-    api_key = os.getenv("GROQ_API_KEY")
-    
-    if not api_key:
-        return "Error: GROQ_API_KEY nahi mili. .env file check karein."
-
-    # Groq Model (Fastest for Deployment)
+    # Groq Llama 3 - Free and Fast
     llm = ChatGroq(
         temperature=0, 
-        groq_api_key=api_key, 
-        model_name="llama-3.3-70b-versatile" 
+        groq_api_key=os.getenv("GROQ_API_KEY"), 
+        model_name="llama-3.3-70b-versatile"
     )
 
     template = """
-    You are DocuMind AI. Answer based only on context.
+    You are DocuMind AI, an expert document assistant.
+    Use the following pieces of context to answer the user's request.
+    If the answer is not in the context, say "I don't have enough data in this document."
+
     Context: {context}
     Question: {question}
-    Answer:"""
+    
+    Helpful Answer:"""
     
     prompt = PromptTemplate(template=template, input_variables=["context", "question"])
 

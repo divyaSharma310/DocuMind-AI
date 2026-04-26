@@ -1,20 +1,16 @@
-import pysqlite3
-import sys
-sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
-
-
-
-
+import os
+import shutil
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import shutil
-import os
+
+# These imports are now optimized for Render
 from ingestor import process_pdf
 from vector_store import save_to_vector_db, load_vector_db
 from brain import ask_question
 
 app = FastAPI()
 
+# Enable CORS for Vercel/Localhost
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,14 +18,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 vector_db = None
-if os.path.exists("./db_storage"):
-    try:
-        vector_db = load_vector_db()
-        print("Existing Knowledge Base Loaded!")
-    except:
-        vector_db = None
+
+@app.get("/")
+def home():
+    return {"message": "DocuMind API is Live"}
 
 @app.post("/upload")
 async def upload(file: UploadFile = File(...)):
@@ -51,11 +44,14 @@ async def upload(file: UploadFile = File(...)):
 async def chat(q: str):
     global vector_db
     if vector_db is None:
-        return {"answer": "Pehle koi PDF upload karein taaki main usey samajh sakun."}
+        try:
+            vector_db = load_vector_db()
+        except:
+            raise HTTPException(status_code=400, detail="Upload a PDF first")
     
     answer = ask_question(vector_db, q)
     return {"answer": answer}
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=10000)
