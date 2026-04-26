@@ -1,13 +1,13 @@
+import os
+from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain.chains import RetrievalQA
 from langchain_core.prompts import PromptTemplate
-import os
-from dotenv import load_dotenv
 
 load_dotenv()
 
 def ask_question(vector_db, query):
-    # Groq Llama 3 - Free and Fast
+    # Senior Note: Using llama-3.3-70b for high-quality production responses
     llm = ChatGroq(
         temperature=0, 
         groq_api_key=os.getenv("GROQ_API_KEY"), 
@@ -26,6 +26,7 @@ def ask_question(vector_db, query):
     
     prompt = PromptTemplate(template=template, input_variables=["context", "question"])
 
+    # Standard Retrieval Chain
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",
